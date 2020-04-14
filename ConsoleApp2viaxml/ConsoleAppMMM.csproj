@@ -43,11 +43,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="JULIETClasses\JuMachineData.cs" />
+    <Compile Include="JULIETClasses\JuMachineDataMMM.cs" />
+    <Compile Include="JULIETClasses\JuMachineSensor.cs" />
+    <Compile Include="JULIETClasses\JuMachineSensorValue.cs" />
+    <Compile Include="ORISConsts\ORISConfig.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

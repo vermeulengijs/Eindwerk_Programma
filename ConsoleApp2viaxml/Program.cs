@@ -4,7 +4,7 @@ using System.IO;
 using System.Xml.Linq;
 using System.Linq;
 
-namespace ConsoleApp1
+namespace ConsoleAppMMM
 {
     class Program
     {
