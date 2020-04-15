@@ -1,15 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using ConsoleAppMMM.ORISConsts;
+using ConsoleApp1.Toolbox;
 
 namespace ConsoleAppMMM.JULIETClasses
 {
     public abstract class JuMachineData
     {
-        //public long RNDX { get; private set; } = 0;
-        //public DateTime RunLinked { get; private set; } = DateTime.MinValue;
-        //public long RunLinkedBy { get; private set; } = 0;
-        //public string MachineModel { get; private set; } = "";
         public long MDNDX { get; }
         public string MachineID { get; protected set; } = "";
         public string MachineName { get; protected set; } = "";
@@ -43,6 +39,6 @@ namespace ConsoleAppMMM.JULIETClasses
 
         public int MachineInterfaceTypeAsInt => (int)MachineInterfaceType;
 
-        public abstract bool LoadFromFile();
+        public abstract bool LoadFromFile(string aFileFullPath);
     }
 }
