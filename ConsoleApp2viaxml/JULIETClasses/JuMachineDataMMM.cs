@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
-using ConsoleApp1.Toolbox;
+using ConsoleAppMMM.Toolbox;
 
 namespace ConsoleAppMMM.JULIETClasses
 {
@@ -48,6 +48,8 @@ namespace ConsoleAppMMM.JULIETClasses
         public override bool LoadFromFile(string aFileFullPath)
         {
             if (!File.Exists(aFileFullPath)) { return false; }
+            if (!Conversions.CheckFileName(aFileFullPath, MachineInterfaceType)) { return false; }
+            
             try
             {
                 XElement mmmSimSocket = XElement.Load(aFileFullPath);
@@ -73,7 +75,7 @@ namespace ConsoleAppMMM.JULIETClasses
             }
             catch (Exception e)
             {
-                Console.WriteLine("JuMachineDataMMM.LoadFromFile: " + e.Message);
+                Console.WriteLine("JuMachineDataMMM.LoadFromFile: " + aFileFullPath + ": " + e.Message);
             }
             return false;
         }
@@ -81,6 +83,7 @@ namespace ConsoleAppMMM.JULIETClasses
         private bool LoadCycleData(List<EntryItem> aEntryItems)
         {
             if ((aEntryItems == null) || (aEntryItems.Count == 0)) { return false; }
+            
             if (!LoadFromEntries("airdetector", aEntryItems, out bool airDetectorPresent)) { return false; }
             AirDetectorPresent = airDetectorPresent;
             if (AirDetectorPresent)
@@ -176,6 +179,7 @@ namespace ConsoleAppMMM.JULIETClasses
         {
             aValue = false;
             if (string.IsNullOrEmpty(aKey) || (aEntryItems == null)) { return false; }
+           
             if (aEntryItems.Any(i => i.Key == aKey))
             {
                 aValue = Conversions.StringToBool(aEntryItems.Single(i => i.Key == aKey).Value);
@@ -188,6 +192,7 @@ namespace ConsoleAppMMM.JULIETClasses
         {
             aValue = "";
             if (string.IsNullOrEmpty(aKey) || (aEntryItems == null)) { return false; }
+            
             if (aEntryItems.Any(i => i.Key == aKey))
             {
                 aValue = aEntryItems.Single(i => i.Key == aKey).Value;
@@ -200,6 +205,7 @@ namespace ConsoleAppMMM.JULIETClasses
         {
             aValue = DateTime.MinValue;
             if (string.IsNullOrEmpty(aKey) || (aEntryItems == null)) { return false; }
+            
             if (aEntryItems.Any(i => i.Key == aKey))
             {
                 aValue = Conversions.StringToDateTime(aEntryItems.Single(i => i.Key == aKey).Value);
@@ -212,6 +218,7 @@ namespace ConsoleAppMMM.JULIETClasses
         {
             aValue = DateTime.MinValue;
             if (string.IsNullOrEmpty(aKey) || (aEntryItems == null)) { return false; }
+            
             if (aEntryItems.Any(i => i.Key == aKey))
             {
                 aValue = Conversions.StringToDateTime(aEntryItems.Single(i => i.Key == aKey).Value, aDate);
@@ -224,6 +231,7 @@ namespace ConsoleAppMMM.JULIETClasses
         {
             aValue = 0;
             if (string.IsNullOrEmpty(aKey) || (aEntryItems == null)) { return false; }
+           
             if (aEntryItems.Any(i => i.Key == aKey))
             {
                 string valueStringComplete = aEntryItems.Single(i => i.Key == aKey).Value;
@@ -237,6 +245,7 @@ namespace ConsoleAppMMM.JULIETClasses
         {
             aValue = 0.0;
             if (string.IsNullOrEmpty(aKey) || (aEntryItems == null)) { return false; }
+            
             if (aEntryItems.Any(i => i.Key == aKey))
             {
                 string valueStringComplete = aEntryItems.Single(i => i.Key == aKey).Value;
@@ -250,6 +259,7 @@ namespace ConsoleAppMMM.JULIETClasses
         {
             if ((aMMMSimSocket == null) || (aEntryItems == null)) { return false; }
             if (SensorCount <= 0) { return false; }
+            
             MachineSensors = new List<JuMachineSensor>();
             XElement sensorsElement = aMMMSimSocket.Element("Sensors");
             if (sensorsElement != null)
@@ -282,6 +292,7 @@ namespace ConsoleAppMMM.JULIETClasses
         {
             if ((aSensorID < 0) || (aSensorID > SensorCount)) { return false; }
             if (aValuesElement == null) { return false; }
+            
             if (aSensorID == 0)
             {
                 MachineSensorValues = new List<JuMachineSensorValue>();

@@ -16,25 +16,29 @@ namespace ConsoleAppMMM
 
         static void Main()
         {
-            // Read App.config file
-            ConfigureApplication();
-            
-
-            using (FileSystemWatcher watcher = new FileSystemWatcher())
+            if (ConfigureApplication())
             {
-                // Set properties of watcher
-                watcher.Path = SourceFolder;
-                watcher.Filter = "*.XML";
-                watcher.IncludeSubdirectories = true;
+                using (FileSystemWatcher watcher = new FileSystemWatcher())
+                {
+                    // Set properties of watcher
+                    watcher.Path = SourceFolder;
+                    watcher.Filter = "*.XML";
+                    watcher.IncludeSubdirectories = true;
 
-                // Set eventhandler of watcher
-                watcher.Created += new FileSystemEventHandler(Oncreated);
-                watcher.EnableRaisingEvents = true;
+                    // Set eventhandler of watcher
+                    watcher.Created += new FileSystemEventHandler(Oncreated);
+                    watcher.EnableRaisingEvents = true;
 
-                // Enable the user to quit the program
-                Console.WriteLine("Monitoring: " + SourceFolder);
-                Console.WriteLine("Press 'q' to quit the application.");
-                while (Console.Read() != 'q') ;
+                    // Enable the user to quit the program
+                    Console.WriteLine("Monitoring: " + SourceFolder);
+                    Console.WriteLine("Press 'q' to quit the application.");
+                    while (Console.Read() != 'q') ;
+                }
+            }
+            else
+            {
+                Console.WriteLine("Press any key to quit the application.");
+                Console.Read();
             }
         }
 
@@ -74,7 +78,7 @@ namespace ConsoleAppMMM
             return true;
         }
 
-        private static void ConfigureApplication()
+        private static bool ConfigureApplication()
         {
             try
             {
@@ -82,20 +86,25 @@ namespace ConsoleAppMMM
                 if (!Directory.Exists(SourceFolder))
                 {
                     Console.WriteLine(SourceFolder + " does not exists.");
+                    return false;
                 }
                 ArchiveFolder = ConfigurationManager.AppSettings.Get("ArchiveFolder");
                 if (ArchiveFile && (!Directory.Exists(ArchiveFolder)))
                 {
                     Console.WriteLine(ArchiveFolder + " does not exists.");
+                    return false;
                 }
                 ArchiveFile = !string.IsNullOrEmpty(ArchiveFolder);
 
                 // TODO: add keys for database access
+
+                return true;
             }
             catch (Exception e)
             {
                 Console.WriteLine("ConfigureApplication: " + e.Message);
             }
+            return false;
         }
     }
 
