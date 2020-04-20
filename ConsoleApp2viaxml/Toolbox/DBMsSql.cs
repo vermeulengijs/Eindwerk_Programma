@@ -111,8 +111,8 @@ namespace ConsoleAppMMM.Toolbox
 
         public static bool Insert(JuMachineSensor aMachineSensor, SqlConnection aConnection, string aSchema)
         {
-            string sql = string.Format("INSERT INTO {0}.ORIS_MACHINESENSOR (MDNDX, SENSORID, CAPTION, SENSORTYPE, SENSORUNIT, MINVALUE, MAXVALUE, DTCREATED) " +
-                "VALUES(@MDNDX, @SENSORID, @CAPTION, @SENSORTYPE, @SENSORUNIT, @MINVALUE, @MAXVALUE, @DTCREATED)", aSchema);
+            string sql = string.Format("INSERT INTO {0}.ORIS_MACHINESENSOR (MSNDX, MDNDX, SENSORID, CAPTION, SENSORTYPE, SENSORUNIT, MINVALUE, MAXVALUE, DTCREATED) " +
+                "VALUES(NEXT VALUE FOR {0}.ORIS_MACHINESENSOR_SEQ, @MDNDX, @SENSORID, @CAPTION, @SENSORTYPE, @SENSORUNIT, @MINVALUE, @MAXVALUE, @DTCREATED)", aSchema);
             int rowCount = 0;
 
             using (SqlCommand cmd = new SqlCommand(sql, aConnection))
@@ -133,8 +133,8 @@ namespace ConsoleAppMMM.Toolbox
 
         public static bool Insert(JuMachineSensorValue aMachineSensorValue, SqlConnection aConnection, string aSchema)
         {
-            string sql = string.Format("INSERT INTO {0}.ORIS_MACHINESENSORVALUE (MDNDX, DTARGUMENT, SENSOR1, SENSOR2, SENSOR3, SENSOR4, SENSOR5, DTCREATED) " +
-               "VALUES(@MDNDX, @DTARGUMENT, @SENSOR1, @SENSOR2, @SENSOR3, @SENSOR4, @SENSOR5, @DTCREATED)", aSchema);
+            string sql = string.Format("INSERT INTO {0}.ORIS_MACHINESENSORVALUE (MSVNDX, MDNDX, DTARGUMENT, SENSOR1, SENSOR2, SENSOR3, SENSOR4, SENSOR5, DTCREATED) " +
+               "VALUES(NEXT VALUE FOR {0}.ORIS_MACHINESENSORVALUE_SEQ, @MDNDX, @DTARGUMENT, @SENSOR1, @SENSOR2, @SENSOR3, @SENSOR4, @SENSOR5, @DTCREATED)", aSchema);
             int rowCount = 0;
 
             using (SqlCommand cmd = new SqlCommand(sql, aConnection))
