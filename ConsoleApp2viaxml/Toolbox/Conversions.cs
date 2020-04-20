@@ -52,6 +52,11 @@ namespace ConsoleAppMMM.Toolbox
             }
         }
 
+        public static string BoolToString(bool aBool)
+        {
+            return aBool ? "T" : "F";
+        }
+
         public static bool StringToBool(string aBoolString)
         {
             if (string.IsNullOrEmpty(aBoolString)) { return false; }

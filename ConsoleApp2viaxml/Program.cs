@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Data.SqlClient;
 using System.IO;
 using System.Xml.Linq;
 using System.Linq;
 using ConsoleAppMMM.JULIETClasses;
+using ConsoleAppMMM.Toolbox;
+using System.Globalization;
 
 namespace ConsoleAppMMM
 {
@@ -13,6 +16,13 @@ namespace ConsoleAppMMM
         private static string SourceFolder { get; set; }
         private static string ArchiveFolder { get; set; }
         private static bool ArchiveFile { get; set; }
+        private static string Database { get; set; }
+        private static string Schema { get; set; }
+        private static string Server { get; set; }
+        private static string UserID { get; set; }
+        private static string Password { get; set; }
+
+        private const string FileFilter = "*.XML";
 
         static void Main()
         {
@@ -22,7 +32,7 @@ namespace ConsoleAppMMM
                 {
                     // Set properties of watcher
                     watcher.Path = SourceFolder;
-                    watcher.Filter = "*.XML";
+                    watcher.Filter = FileFilter;
                     watcher.IncludeSubdirectories = true;
 
                     // Set eventhandler of watcher
@@ -45,17 +55,49 @@ namespace ConsoleAppMMM
         private static void Oncreated(object sender, FileSystemEventArgs e)
         {
             Console.WriteLine("New file detected: " + e.Name);
-            // TODO: get next value of sequence and use this value to initiate MDNDX of machineDataMMM
-            JuMachineDataMMM machineDataMMM = new JuMachineDataMMM(-1);
-            if (machineDataMMM.LoadFromFile(e.FullPath))
+            try
             {
-                Console.WriteLine(e.Name + " was parsed.");
+                SqlConnection connection = DBMsSql.GetConnection(Database, Server, UserID, Password);
+                if (connection != null)
+                {
+                    if (!DBMsSql.GetMDNDX(connection, Schema, out long mdNDX))
+                    {
+                        Console.WriteLine(e.Name + ": could not get a valid MDNDX");
+                        return;
+                    }
+                    JuMachineDataMMM machineDataMMM = new JuMachineDataMMM(mdNDX);
+                    if (machineDataMMM.LoadFromFile(e.FullPath))
+                    {
+                        Console.WriteLine(e.Name + " was parsed.");
+                    }
+                    else
+                    {
+                        Console.WriteLine(e.Name + " could not be parsed.");
+                    }
+                    if (!DBMsSql.Insert(machineDataMMM, connection, Schema))
+                    {
+                        Console.WriteLine(e.Name + ": MachineData could not be written to database");
+                        return;
+                    }
+                    foreach (JuMachineSensor machineSensor in machineDataMMM.MachineSensors)
+                    {
+                        if (!DBMsSql.Insert(machineSensor, connection, Schema))
+                        {
+                            Console.WriteLine(e.Name + ": MachineSensor " + machineSensor.SensorID + " could not be written to database");
+                            return;
+                        }
+                    }
+                    // TODO: save the lists MachineSensors and MachineSensorValues to the database
+                }
+                else
+                {
+                    Console.WriteLine("Connection to database failed");
+                }
             }
-            else
+            catch (Exception exc)
             {
-                Console.WriteLine(e.Name + " could not be parsed.");
+                Console.WriteLine(e.Name + " database handling error: " + exc.Message);
             }
-            // TODO: save machineDataMMM to the database. This function should also save the lists MachineSensors and MachineSensorValues to the database
 
             if (ArchiveFile)
             {
@@ -95,9 +137,11 @@ namespace ConsoleAppMMM
                     return false;
                 }
                 ArchiveFile = !string.IsNullOrEmpty(ArchiveFolder);
-
-                // TODO: add keys for database access
-
+                Database = ConfigurationManager.AppSettings.Get("Database");
+                Schema = ConfigurationManager.AppSettings.Get("Schema");
+                Server = ConfigurationManager.AppSettings.Get("Server");
+                UserID = ConfigurationManager.AppSettings.Get("UserID");
+                Password = ConfigurationManager.AppSettings.Get("Password");
                 return true;
             }
             catch (Exception e)
