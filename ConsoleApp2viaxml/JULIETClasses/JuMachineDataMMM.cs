@@ -9,7 +9,6 @@ namespace ConsoleAppMMM.JULIETClasses
 {
     public class JuMachineDataMMM : JuMachineData
     {
-        public string Language { get; private set; } = "";
         public string SerialNumber { get; private set; } = "";
         public string Company2 { get; private set; } = "";
         public string StoppedBy { get; private set; } = "";
@@ -55,11 +54,6 @@ namespace ConsoleAppMMM.JULIETClasses
                 XElement mmmSimSocket = XElement.Load(aFileFullPath);
                 if (mmmSimSocket == null) { return false; }
                 
-                XElement languageElement = mmmSimSocket.Element("Language");
-                if (languageElement != null)
-                { 
-                    Language = languageElement.Attribute("Short").Value; 
-                }
                 XElement formElement = mmmSimSocket.Element("Form");
                 if (formElement != null)
                 {
