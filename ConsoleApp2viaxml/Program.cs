@@ -55,9 +55,10 @@ namespace ConsoleAppMMM
         private static void Oncreated(object sender, FileSystemEventArgs e)
         {
             Console.WriteLine("New file detected: " + e.Name);
+            SqlConnection connection = null;
             try
             {
-                SqlConnection connection = DBMsSql.GetConnection(Database, Server, UserID, Password);
+                connection = DBMsSql.GetConnection(Database, Server, UserID, Password);
                 if (connection != null)
                 {
                     if (!DBMsSql.GetMDNDX(connection, Schema, out long mdNDX))
@@ -98,6 +99,10 @@ namespace ConsoleAppMMM
             catch (Exception exc)
             {
                 Console.WriteLine(e.Name + " database handling error: " + exc.Message);
+            }
+            finally
+            {
+                if (connection != null) { connection.Close(); }
             }
 
             if (ArchiveFile)
