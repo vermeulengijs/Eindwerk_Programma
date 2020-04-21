@@ -73,6 +73,7 @@ namespace ConsoleAppMMM
                     else
                     {
                         Console.WriteLine(e.Name + " could not be parsed.");
+                        return;
                     }
                     if (!DBMsSql.Insert(machineDataMMM, connection, Schema))
                     {
@@ -131,12 +132,12 @@ namespace ConsoleAppMMM
                     return false;
                 }
                 ArchiveFolder = ConfigurationManager.AppSettings.Get("ArchiveFolder");
+                ArchiveFile = !string.IsNullOrEmpty(ArchiveFolder);
                 if (ArchiveFile && (!Directory.Exists(ArchiveFolder)))
                 {
                     Console.WriteLine(ArchiveFolder + " does not exists.");
                     return false;
                 }
-                ArchiveFile = !string.IsNullOrEmpty(ArchiveFolder);
                 Database = ConfigurationManager.AppSettings.Get("Database");
                 Schema = ConfigurationManager.AppSettings.Get("Schema");
                 Server = ConfigurationManager.AppSettings.Get("Server");
