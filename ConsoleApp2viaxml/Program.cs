@@ -1,21 +1,102 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.IO;
 using System.Xml.Linq;
 using System.Linq;
+using ConsoleAppMMM.JULIETClasses;
 
-namespace ConsoleApp1
+namespace ConsoleAppMMM
 {
-    class Program
+    static class Program
     {
-        static void Main(string[] args)
+        private static string SourceFolder { get; set; }
+        private static string ArchiveFolder { get; set; }
+        private static bool ArchiveFile { get; set; }
+
+        static void Main()
         {
+            // Read App.config file
+            ConfigureApplication();
+            
 
-            FileInputMonitor fileInputMonitor = new FileInputMonitor();
-            Console.Read();
+            using (FileSystemWatcher watcher = new FileSystemWatcher())
+            {
+                // Set properties of watcher
+                watcher.Path = SourceFolder;
+                watcher.Filter = "*.XML";
+                watcher.IncludeSubdirectories = true;
 
+                // Set eventhandler of watcher
+                watcher.Created += new FileSystemEventHandler(Oncreated);
+                watcher.EnableRaisingEvents = true;
+
+                // Enable the user to quit the program
+                Console.WriteLine("Monitoring: " + SourceFolder);
+                Console.WriteLine("Press 'q' to quit the application.");
+                while (Console.Read() != 'q') ;
+            }
         }
 
+        private static void Oncreated(object sender, FileSystemEventArgs e)
+        {
+            Console.WriteLine("New file detected: " + e.Name);
+            // TODO: get next value of sequence and use this value to initiate MDNDX of machineDataMMM
+            JuMachineDataMMM machineDataMMM = new JuMachineDataMMM(-1);
+            if (machineDataMMM.LoadFromFile(e.FullPath))
+            {
+                Console.WriteLine(e.Name + " was parsed.");
+            }
+            else
+            {
+                Console.WriteLine(e.Name + " could not be parsed.");
+            }
+            // TODO: save machineDataMMM to the database. This function should also save the lists MachineSensors and MachineSensorValues to the database
+
+            if (ArchiveFile)
+            {
+                if (!MoveFileToArchive(e.FullPath))
+                {
+                    Console.WriteLine(e.Name + " was archived.");
+                }
+                else
+                {
+                    Console.WriteLine(e.Name + " could not be archived.");
+                }
+            }
+        }
+
+        private static bool MoveFileToArchive(string aFileFullPath)
+        {
+            if (!File.Exists(aFileFullPath)) { return false; }
+            
+            // TODO: write function
+            return true;
+        }
+
+        private static void ConfigureApplication()
+        {
+            try
+            {
+                SourceFolder = ConfigurationManager.AppSettings.Get("SourceFolder");
+                if (!Directory.Exists(SourceFolder))
+                {
+                    Console.WriteLine(SourceFolder + " does not exists.");
+                }
+                ArchiveFolder = ConfigurationManager.AppSettings.Get("ArchiveFolder");
+                if (ArchiveFile && (!Directory.Exists(ArchiveFolder)))
+                {
+                    Console.WriteLine(ArchiveFolder + " does not exists.");
+                }
+                ArchiveFile = !string.IsNullOrEmpty(ArchiveFolder);
+
+                // TODO: add keys for database access
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("ConfigureApplication: " + e.Message);
+            }
+        }
     }
 
     public class FileInputMonitor
