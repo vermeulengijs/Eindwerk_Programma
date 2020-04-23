@@ -110,8 +110,8 @@ namespace ConsoleAppMMM.Toolbox
 
         public static bool Insert(JuMachineSensor aMachineSensor, SqlConnection aConnection, string aSchema)
         {
-            string sql = string.Format("INSERT INTO {0}.ORIS_MACHINESENSOR (MSNDX, MDNDX, SENSORID, CAPTION, SENSORTYPE, SENSORUNIT, MINVALUE, MAXVALUE, DTCREATED) " +
-                "VALUES(NEXT VALUE FOR {0}.ORIS_MACHINESENSOR_SEQ, @MDNDX, @SENSORID, @CAPTION, @SENSORTYPE, @SENSORUNIT, @MINVALUE, @MAXVALUE, @DTCREATED)", aSchema);
+            string sql = string.Format("INSERT INTO {0}.ORIS_MACHINESENSOR (MSNDX, MDNDX, SENSORID, CAPTION, SENSORTYPE, SENSORUNIT, MINVAL, MAXVAL, DTCREATED) " +
+                "VALUES(NEXT VALUE FOR {0}.ORIS_MACHINESENSOR_SEQ, @MDNDX, @SENSORID, @CAPTION, @SENSORTYPE, @SENSORUNIT, @MINVAL, @MAXVAL, @DTCREATED)", aSchema);
             int rowCount = 0;
 
             using (SqlCommand cmd = new SqlCommand(sql, aConnection))
@@ -121,8 +121,8 @@ namespace ConsoleAppMMM.Toolbox
                 cmd.Parameters.AddWithValue("@CAPTION", aMachineSensor.Caption);
                 cmd.Parameters.AddWithValue("@SENSORTYPE", (int)aMachineSensor.SensorType);
                 cmd.Parameters.AddWithValue("@SENSORUNIT", (int)aMachineSensor.SensorUnit);
-                cmd.Parameters.AddWithValue("@MINVALUE", aMachineSensor.MinValue);
-                cmd.Parameters.AddWithValue("@MAXVALUE", aMachineSensor.MaxValue);
+                cmd.Parameters.AddWithValue("@MINVAL", aMachineSensor.MinValue);
+                cmd.Parameters.AddWithValue("@MAXVAL", aMachineSensor.MaxValue);
                 cmd.Parameters.AddWithValue("@DTCREATED", DateTime.Now);
 
                 rowCount = cmd.ExecuteNonQuery();
