@@ -229,8 +229,12 @@ namespace ConsoleAppMMM.JULIETClasses
             if (aEntryItems.Any(i => i.Key == aKey))
             {
                 string valueStringComplete = aEntryItems.Single(i => i.Key == aKey).Value;
-                string valueString = valueStringComplete.Substring(0, valueStringComplete.Length - aToRemoveFromEnd);
-                return int.TryParse(valueString, out aValue);
+                if (!string.IsNullOrEmpty(valueStringComplete))
+                {
+                    string valueString = valueStringComplete.Substring(0, valueStringComplete.Length - aToRemoveFromEnd);
+                    return int.TryParse(valueString, out aValue);
+                }
+                return true;
             }
             return false;
         }
@@ -243,8 +247,12 @@ namespace ConsoleAppMMM.JULIETClasses
             if (aEntryItems.Any(i => i.Key == aKey))
             {
                 string valueStringComplete = aEntryItems.Single(i => i.Key == aKey).Value;
-                string valueString = valueStringComplete.Substring(0, valueStringComplete.Length - aToRemoveFromEnd);
-                return double.TryParse(aEntryItems.Single(i => i.Key == aKey).Value, out aValue);
+                if (!string.IsNullOrEmpty(valueStringComplete))
+                {
+                    string valueString = valueStringComplete.Substring(0, valueStringComplete.Length - aToRemoveFromEnd);
+                    return double.TryParse(aEntryItems.Single(i => i.Key == aKey).Value, out aValue);
+                }
+                return true;
             }
             return false;
         }
