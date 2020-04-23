@@ -81,6 +81,17 @@ namespace ConsoleAppMMM.Toolbox
             return new DateTime(aDate.Year, aDate.Month, aDate.Day, time.Hour, time.Minute, time.Second);
         }
 
+        // Time format HH:mm:ss
+        public static int StringToSeconds(string aTimeString)
+        {
+            if (string.IsNullOrEmpty(aTimeString)) { return 0; }
+            if (aTimeString.Length < 8) { return 0; }
+            if (!int.TryParse(aTimeString.Substring(0, 2), out int hours)) { return 0; }
+            if (!int.TryParse(aTimeString.Substring(3, 2), out int minutes)) { return 0; }
+            if (!int.TryParse(aTimeString.Substring(5, 2), out int seconds)) { return 0; }
+            return (hours * 60 * 60) + (minutes * 60) + seconds;
+        }
+
         public static JuSensorType StringToSensorType(string aSensorTypeAsString)
         {
             if (string.IsNullOrEmpty(aSensorTypeAsString)) { return JuSensorType.NotDefined; }
