@@ -135,6 +135,7 @@ namespace ConsoleAppMMM
             Console.WriteLine(e.FullPath);
             Console.WriteLine(file.Name);
             ProcessFile(e.FullPath);
+            InsertInDatabase();
            // MoveFile(e.FullPath);
         }
 
@@ -212,6 +213,25 @@ namespace ConsoleAppMMM
             Console.WriteLine("DONE");
 
         }
+
+        private void InsertInDatabase( )
+        {
+            Console.WriteLine("Writing data to the database");
+            string connectionString = "Data Source=DESKTOP-81I8VH5\\SQLEXPRESS07; Initial Catalog = DBAutoclaaf; Integrated Security = True";
+            string sql = "";
+            
+            SqlConnection con = new SqlConnection(connectionString);
+            con.Open();
+            Console.WriteLine("Connection is open");
+            if (con.State== System.Data.ConnectionState.Open)
+            {
+                sql= "INSERT INTO dataautoclaaf_Batch_results(Index_ID,Language) values(3,'Nederlands')";
+                SqlCommand cmd = new SqlCommand(sql, con);
+                cmd.ExecuteNonQuery();
+            }
+            con.Close();
+                       
+        }
         /* MoveFile Function
          *  Een functie dat dient om het bestand te verplaatsen en te hernoemen als alle data verwerkt is.
          */
@@ -224,224 +244,6 @@ namespace ConsoleAppMMM
             return;
         }
 
-        /* GetAmountOfValues Function
-         *  Een functie dat dient om het # waardes dat de sensoren hebben opgemeten te bepalen.
-         */ 
-        private int GetAmountOfValues(string data, int startlocatie)
-        {
-            // De hoeveel values dat er in de file zitten binnenhalen
-
-            // Checken of er een V staat op de index
-            int i = 0;                                      // # counter
-            int begin;                                      // De plaats in de string waar de V check op gebeurd
-            int afstand = Getfilling(data, startlocatie);   // De filling afstand tussen de waardes
-            begin = startlocatie - 6;                       // De startlocatie van de waarde - 6 om op de plaats van de V te zitten
-            
-            bool Check = true;                              // Is er nog een volgende waarde ja == true nee == false;
-
-            char[] Controle;                                // Tijdelijke array om de te checken char in te steken
-    
-            while(Check == true)                            // Is er een volgende waarde Ja ga door / nee stop
-            {
-                
-                Controle = data.ToCharArray(begin, 1);      // Haal de te checken char op
-                if (Controle[0].Equals('V'))                // is het een V, ja er is nog een waarde
-                {
-                    //Console.WriteLine("Het is een V");
-                    
-                    Check = true;                           // Blijven zoeken naar waardes
-                    begin = begin + afstand;                // Zet de begin index klaar voor een mogelijk volgende waarde
-                    i++;                                    // +1 waarde
-                }
-                else
-                {
-                    Check = false;                          // er is geen volgende waarde, exit de while loop
-                    break;
-                }
-
-                afstand = Getfilling(data, begin+6);
-            }
-            return i;                                       // return de counter
-        }
-
-        /* GetLength Function
-         *  Een functie dat dient om de lengte van de waardes te bepalen.
-         */ 
-        private int GetLengthValue(string data, int startlocatie )
-        {
-            int i = 0;
-            int begin;
-
-            begin = startlocatie;
-            char[] Controle;
-
-            bool Check = true;
-
-            while(Check == true)
-            {
-                Controle = data.ToCharArray(begin, 1);
-                if (!(Controle[0].Equals('<')))
-                {
-                    Check = true;
-                    begin++;
-                    i++;
-                }
-                else
-                {
-                    Check = false;
-                    //Console.WriteLine(i);
-                }
-            }
-
-            return i;
-        }
-
-        /* GetFilling Function
-         *   Een functie dat dient om het aantal karakters tussen de eigenlijke waardes te bepalen.
-         */ 
-        private int Getfilling(string data, int startlocatie)
-        {
-            int i = 0;
-            int begin;
-            int aantal = 0;
-
-            begin = startlocatie;
-            char[] Controle;
-
-            while (aantal < 2)
-            {
-                Controle = data.ToCharArray(begin, 1);
-                if ((Controle[0].Equals('>') ) )
-                {
-                    aantal++;
-                    
-                }
-
-                if (aantal <= 2)
-                {
-                    begin++;
-                    i++;
-                }
-
-            }
-           // Console.Write("De filling waarde is : ");
-           // Console.WriteLine(i);
-            return i;
-        }
-
-        /* GetArrayValues Function
-         * Een functie dat dient om de waardes van de sensoren op te slaan in een 2D array.
-         */ 
-        private char[ , ] GetArrayValues(string data, int aantal, int index)
-        {
-            int grootte = GetLengthValue(data, index);
-            int afstand = Getfilling(data, index);
-            int i;
-            int a = 0;
-
-            char[] values = new char[50];
-            char[ , ] values2 = new char[aantal, 50];
-
-            
-            for (i = 0; i < aantal; i++)
-            {
-                
-                values = data.ToCharArray(index, grootte);
-                for (a = 0; a < grootte; a++)
-                {
-                    values2[i,a] = values[a];
-                    Console.Write(values2[i,a]);
-                }
-                Console.WriteLine();
-                index = index + afstand;
-                grootte = GetLengthValue(data, index);
-                afstand = Getfilling(data, index);
-
-            }
-
-            return values2;
-        }
-
-        /* Get SingleValue Function
-         * Een functie dat dient om een string van data uit het bestand te halen.
-         */ 
-        private char[] GetSingleValue(string data, int startlocatie)
-        {
-            int grootte = 0;
-
-            grootte = GetLength(data, startlocatie);
-
-            char[] value = new char[grootte];
-            value = data.ToCharArray(startlocatie, grootte);
-            return value;
-
-        }
-
-        /* Get Length function
-         * Een functie dat dient om de lengte van waardes tussen 2 " tekens te berekenen
-         */ 
-        private int GetLength(string data, int startlocatie)
-        {
-            int i = 0;
-            int aantal = 0;
-            int begin = 0;
-            char[] Controle;
-
-            begin = startlocatie;
-
-            while (aantal < 2)
-            {
-                Controle = data.ToCharArray(begin, 1);
-                if ((Controle[0].Equals('"')))
-                {
-                    aantal++;
-                }
-
-                if (aantal <= 2)
-                {
-                    begin++;
-                    i++;
-                }
-
-            }
-
-            return i;
-        }
-
-        /* FindIndex Function
-         * Een functie dat dient om de Index van alle waardes te bepalen.
-         */ 
-        private int FindIndex(string data, string Text, int Index)
-        {
-            int i = Index;
-            int a = 0;
-            int len = Text.Length;
-            int aantal = 0;
-
-            char[] Checksum = new char[len];
-            char[] Controle;
-
-            Checksum = Text.ToCharArray(0, len);
-            //Console.WriteLine(Checksum);
-            
-            while (aantal != len)
-            {
-                Controle = data.ToCharArray(i, 1);
-                if (Controle[0].Equals(Checksum[a]))
-                {
-                    a++;
-                    aantal++;
-                }
-                else
-                {
-                    i++;
-                }
-            }
-            i++;
-
-            return i;
-
-        }
     }
 
 }

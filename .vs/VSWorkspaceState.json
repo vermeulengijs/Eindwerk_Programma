@@ -1,8 +1,9 @@
 {
   "ExpandedNodes": [
     "",
-    "\\ConsoleApp2viaxml"
+    "\\ConsoleApp2viaxml",
+    "\\directory"
   ],
-  "SelectedNode": "\\ConsoleApp2viaxml\\ConsoleApp1.sln",
+  "SelectedNode": "\\ConsoleApp2viaxml\\Program.cs",
   "PreviewInSolutionExplorer": false
 }
