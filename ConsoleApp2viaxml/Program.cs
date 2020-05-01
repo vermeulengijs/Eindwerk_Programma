@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Data.SqlClient;
 using System.IO;
 using System.Xml.Linq;
 using System.Linq;
 using ConsoleAppMMM.JULIETClasses;
+using ConsoleAppMMM.Toolbox;
+using System.Globalization;
 
 namespace ConsoleAppMMM
 {
@@ -13,45 +16,94 @@ namespace ConsoleAppMMM
         private static string SourceFolder { get; set; }
         private static string ArchiveFolder { get; set; }
         private static bool ArchiveFile { get; set; }
+        private static string Database { get; set; }
+        private static string Schema { get; set; }
+        private static string Server { get; set; }
+        private static string UserID { get; set; }
+        private static string Password { get; set; }
+
+        private const string FileFilter = "*.XML";
 
         static void Main()
         {
-            // Read App.config file
-            ConfigureApplication();
-            
-
-            using (FileSystemWatcher watcher = new FileSystemWatcher())
+            if (ConfigureApplication())
             {
-                // Set properties of watcher
-                watcher.Path = SourceFolder;
-                watcher.Filter = "*.XML";
-                watcher.IncludeSubdirectories = true;
+                using (FileSystemWatcher watcher = new FileSystemWatcher())
+                {
+                    // Set properties of watcher
+                    watcher.Path = SourceFolder;
+                    watcher.Filter = FileFilter;
+                    watcher.IncludeSubdirectories = true;
 
-                // Set eventhandler of watcher
-                watcher.Created += new FileSystemEventHandler(Oncreated);
-                watcher.EnableRaisingEvents = true;
+                    // Set eventhandler of watcher
+                    watcher.Created += new FileSystemEventHandler(Oncreated);
+                    watcher.EnableRaisingEvents = true;
 
-                // Enable the user to quit the program
-                Console.WriteLine("Monitoring: " + SourceFolder);
-                Console.WriteLine("Press 'q' to quit the application.");
-                while (Console.Read() != 'q') ;
+                    // Enable the user to quit the program
+                    Console.WriteLine("Monitoring: " + SourceFolder);
+                    Console.WriteLine("Press 'q' to quit the application.");
+                    while (Console.Read() != 'q') ;
+                }
+            }
+            else
+            {
+                Console.WriteLine("Press any key to quit the application.");
+                Console.Read();
             }
         }
 
         private static void Oncreated(object sender, FileSystemEventArgs e)
         {
             Console.WriteLine("New file detected: " + e.Name);
-            // TODO: get next value of sequence and use this value to initiate MDNDX of machineDataMMM
-            JuMachineDataMMM machineDataMMM = new JuMachineDataMMM(-1);
-            if (machineDataMMM.LoadFromFile(e.FullPath))
+            SqlConnection connection = null;
+            try
             {
-                Console.WriteLine(e.Name + " was parsed.");
+                connection = DBMsSql.GetConnection(Database, Server, UserID, Password);
+                if (connection != null)
+                {
+                    if (!DBMsSql.GetMDNDX(connection, Schema, out long mdNDX))
+                    {
+                        Console.WriteLine(e.Name + ": could not get a valid MDNDX");
+                        return;
+                    }
+                    JuMachineDataMMM machineDataMMM = new JuMachineDataMMM(mdNDX);
+                    if (machineDataMMM.LoadFromFile(e.FullPath))
+                    {
+                        Console.WriteLine(e.Name + " was parsed.");
+                    }
+                    else
+                    {
+                        Console.WriteLine(e.Name + " could not be parsed.");
+                        return;
+                    }
+                    if (!DBMsSql.Insert(machineDataMMM, connection, Schema))
+                    {
+                        Console.WriteLine(e.Name + ": MachineData could not be written to database");
+                        return;
+                    }
+                    foreach (JuMachineSensor machineSensor in machineDataMMM.MachineSensors)
+                    {
+                        if (!DBMsSql.Insert(machineSensor, connection, Schema))
+                        {
+                            Console.WriteLine(e.Name + ": MachineSensor " + machineSensor.SensorID + " could not be written to database");
+                            return;
+                        }
+                    }
+                    // TODO: save the lists MachineSensors and MachineSensorValues to the database
+                }
+                else
+                {
+                    Console.WriteLine("Connection to database failed");
+                }
             }
-            else
+            catch (Exception exc)
             {
-                Console.WriteLine(e.Name + " could not be parsed.");
+                Console.WriteLine(e.Name + " database handling error: " + exc.Message);
             }
-            // TODO: save machineDataMMM to the database. This function should also save the lists MachineSensors and MachineSensorValues to the database
+            finally
+            {
+                if (connection != null) { connection.Close(); }
+            }
 
             if (ArchiveFile)
             {
@@ -74,7 +126,7 @@ namespace ConsoleAppMMM
             return true;
         }
 
-        private static void ConfigureApplication()
+        private static bool ConfigureApplication()
         {
             try
             {
@@ -82,20 +134,27 @@ namespace ConsoleAppMMM
                 if (!Directory.Exists(SourceFolder))
                 {
                     Console.WriteLine(SourceFolder + " does not exists.");
+                    return false;
                 }
                 ArchiveFolder = ConfigurationManager.AppSettings.Get("ArchiveFolder");
+                ArchiveFile = !string.IsNullOrEmpty(ArchiveFolder);
                 if (ArchiveFile && (!Directory.Exists(ArchiveFolder)))
                 {
                     Console.WriteLine(ArchiveFolder + " does not exists.");
+                    return false;
                 }
-                ArchiveFile = !string.IsNullOrEmpty(ArchiveFolder);
-
-                // TODO: add keys for database access
+                Database = ConfigurationManager.AppSettings.Get("Database");
+                Schema = ConfigurationManager.AppSettings.Get("Schema");
+                Server = ConfigurationManager.AppSettings.Get("Server");
+                UserID = ConfigurationManager.AppSettings.Get("UserID");
+                Password = ConfigurationManager.AppSettings.Get("Password");
+                return true;
             }
             catch (Exception e)
             {
                 Console.WriteLine("ConfigureApplication: " + e.Message);
             }
+            return false;
         }
     }
 

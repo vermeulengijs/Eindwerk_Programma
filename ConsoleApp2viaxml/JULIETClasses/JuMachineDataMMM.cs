@@ -3,13 +3,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
-using ConsoleApp1.Toolbox;
+using ConsoleAppMMM.Toolbox;
 
 namespace ConsoleAppMMM.JULIETClasses
 {
     public class JuMachineDataMMM : JuMachineData
     {
-        public string Language { get; private set; } = "";
         public string SerialNumber { get; private set; } = "";
         public string Company2 { get; private set; } = "";
         public string StoppedBy { get; private set; } = "";
@@ -48,16 +47,13 @@ namespace ConsoleAppMMM.JULIETClasses
         public override bool LoadFromFile(string aFileFullPath)
         {
             if (!File.Exists(aFileFullPath)) { return false; }
+            if (!Conversions.CheckFileName(aFileFullPath, MachineInterfaceType)) { return false; }
+            
             try
             {
                 XElement mmmSimSocket = XElement.Load(aFileFullPath);
                 if (mmmSimSocket == null) { return false; }
                 
-                XElement languageElement = mmmSimSocket.Element("Language");
-                if (languageElement != null)
-                { 
-                    Language = languageElement.Attribute("Short").Value; 
-                }
                 XElement formElement = mmmSimSocket.Element("Form");
                 if (formElement != null)
                 {
@@ -73,7 +69,7 @@ namespace ConsoleAppMMM.JULIETClasses
             }
             catch (Exception e)
             {
-                Console.WriteLine("JuMachineDataMMM.LoadFromFile: " + e.Message);
+                Console.WriteLine("JuMachineDataMMM.LoadFromFile: " + aFileFullPath + ": " + e.Message);
             }
             return false;
         }
@@ -81,6 +77,7 @@ namespace ConsoleAppMMM.JULIETClasses
         private bool LoadCycleData(List<EntryItem> aEntryItems)
         {
             if ((aEntryItems == null) || (aEntryItems.Count == 0)) { return false; }
+            
             if (!LoadFromEntries("airdetector", aEntryItems, out bool airDetectorPresent)) { return false; }
             AirDetectorPresent = airDetectorPresent;
             if (AirDetectorPresent)
@@ -102,9 +99,16 @@ namespace ConsoleAppMMM.JULIETClasses
             StoppedBy = stoppedBy;
             if (!LoadFromEntries("deltadruck", 4, aEntryItems, out int pressureDifference)) { return false; }
             PressureDifference = pressureDifference;
-
-            // TODO: "deltadruck2" - "evakkamdrmin"
-
+            if (!LoadFromEntries("deltadruck2", 4, aEntryItems, out int pressureDifference2)) { return false; }
+            PressureDifference2 = pressureDifference2;
+            if (!LoadFromEntries("deltadrucknominal", 4, aEntryItems, out int pressureDifferenceAllowed)) { return false; }
+            PressureDifferenceAllowed = pressureDifferenceAllowed;
+            if (!LoadFromEntries("evakanz", 0, aEntryItems, out int airRemovalCount)) { return false; }
+            AirRemovalCount = airRemovalCount;
+            if (!LoadFromEntries("evakkamdrmax", 4, aEntryItems, out int prephasePressureMax)) { return false; }
+            PrephasePressureMax = prephasePressureMax;
+            if (!LoadFromEntries("evakkamdrmin", 4, aEntryItems, out int prephasePressureMin)) { return false; }
+            PrephasePressureMin = prephasePressureMin;
             if (!LoadFromEntries("f0ValuePresent", aEntryItems, out bool f0ValuePresent)) { return false; }
             F0ValuePresent = f0ValuePresent;
             if (F0ValuePresent)
@@ -116,18 +120,84 @@ namespace ConsoleAppMMM.JULIETClasses
             {
                 F0Value = 0.0;
             }
-
-            // TODO: "fabriknr" -  "res"
-
+            if (!LoadFromEntries("fabriknr", aEntryItems, out string serialNumber)) { return false; }
+            SerialNumber = serialNumber;
+            if (!LoadFromEntries("firm1", aEntryItems, out string company)) { return false; }
+            Company = company;
+            if (!LoadFromEntries("firm2", aEntryItems, out string company2)) { return false; }
+            Company2 = company2;
+            if (!LoadFromEntries("lastbd", aEntryItems, out DateTime lastBDTest)) { return false; }
+            LastBDTest = lastBDTest;
+            if (!LoadFromEntries("lastbd_no", aEntryItems, out string lastBDTestReference)) { return false; }
+            LastBDTestReference = lastBDTestReference;
+            if (!LoadFromEntries("lastvak", aEntryItems, out DateTime lastVacuumTest)) { return false; }
+            LastVacuumTest = lastVacuumTest;
+            if (!LoadFromEntries("lastvak_no", aEntryItems, out string lastVacuumTestReference)) { return false; }
+            LastVacuumTestReference = lastVacuumTestReference;
+            if (!LoadFromEntries("nextwart", 0, aEntryItems, out int nextMaintenance)) { return false; }
+            NextMaintenance = nextMaintenance;
+            if (!LoadFromEntries("programNo", aEntryItems, out string programReference)) { return false; }
+            ProgramReference = programReference;
+            if (!LoadFromEntries("programmname", aEntryItems, out string programName)) { return false; }
+            ProgramName = programName;
+            if (!LoadFromEntries("res", aEntryItems, out bool isCycleOk)) { return false; }
+            IsCycleOk = isCycleOk;
             if (!LoadFromEntries("sensorCount", 0, aEntryItems, out int sensorCount)) { return false; }
             SensorCount = sensorCount;
-
-            // TODO: "steamSpyPresent" - "SW_VERSION"
-
+            if (!LoadFromEntries("steamSpyPresent", aEntryItems, out bool steamSpyPresent)) { return false; }
+            SteamSpyPresent = steamSpyPresent;
+            if (SteamSpyPresent)
+            {
+                if (!LoadFromEntries("steamSpyResult", aEntryItems, out bool steamSpyResult)) { return false; }
+                SteamSpyResult = steamSpyResult;
+            }
+            else
+            {
+                SteamSpyResult = false;
+            }
+            if (!LoadFromEntries("sterinr", aEntryItems, out string machineID)) { return false; }
+            MachineID = machineID;
+            if (!LoadFromEntries("userID", aEntryItems, out string startedBy)) { return false; }
+            StartedBy = startedBy;
+            if (!LoadFromEntries("vakevakzeit", 0, aEntryItems, out int waitingTime)) { return false; }
+            WaitingTime = waitingTime;
+            if (!LoadFromEntries("SW_VERSION", aEntryItems, out string softwareVersion)) { return false; }
+            SoftwareVersion = softwareVersion;
             if (!LoadFromEntries("START_AIR_REMOVAL", CycleStarted, aEntryItems, out DateTime airRemovelStart)) { return false; }
             AirRemovalStart = airRemovelStart;
-
-            // TODO: "HOLD_TIME_START" - "RESULT"
+            if (!LoadFromEntries("HOLD_TIME_START", CycleStarted, aEntryItems, out DateTime holdTimeStart)) { return false; }
+            HoldTimeStart = holdTimeStart;
+            if (!LoadFromEntries("HOLD_TIME_START_PRESSURE", 4, aEntryItems, out int holdTimeStartPressure)) { return false; }
+            HoldTimeStartPressure = holdTimeStartPressure;
+            if (!IsVacuumTest)
+            {
+                if (!LoadFromEntries("HOLD_TIME_START_TEMPERATURE", 2, aEntryItems, out double holdTimeStartTemp)) { return false; }
+                HoldTimeStartTemp = holdTimeStartTemp;
+                if (!LoadFromEntries("HOLD_TIME_START_AIRDETECTOR", 2, aEntryItems, out double holdTimeStartAirDetector)) { return false; }
+                HoldTimeStartAirDetector = holdTimeStartAirDetector;
+            }
+            if (!LoadFromEntries("HOLD_TIME_END", CycleStarted, aEntryItems, out DateTime holdTimeEnd)) { return false; }
+            HoldTimeEnd = holdTimeEnd;
+            if (!LoadFromEntries("HOLD_TIME_END_PRESSURE", 4, aEntryItems, out int holdTimeEndPressure)) { return false; }
+            HoldTimeEndPressure = holdTimeEndPressure;
+            if (!IsVacuumTest)
+            {
+                if (!LoadFromEntries("HOLD_TIME_END_TEMPERATURE", 2, aEntryItems, out double holdTimeEndTemp)) { return false; }
+                HoldTimeEndTemp = holdTimeEndTemp;
+                if (!LoadFromEntries("HOLD_TIME_END_AIRDETECTOR", 2, aEntryItems, out double holdTimeEndAirDetector)) { return false; }
+                HoldTimeEndAirDetector = holdTimeEndAirDetector;
+            }
+            if (!LoadFromEntries("HOLD_TIME_END_PRESSURE", aEntryItems, out int holdTime)) { return false; }
+            HoldTime = holdTime;
+            if (!IsVacuumTest)
+            {
+                if (!LoadFromEntries("DRYING_END", CycleStarted, aEntryItems, out DateTime dryingEnd)) { return false; }
+                DryingEnd = dryingEnd;
+                if (!LoadFromEntries("DRYING_END_PRESSURE", 4, aEntryItems, out int dryingEndPressure)) { return false; }
+                DryingEndPressure = dryingEndPressure;
+            }
+            if (!LoadFromEntries("RESULT", aEntryItems, out string cycleResult)) { return false; }
+            CycleResult = cycleResult;
 
             return true;
         }
@@ -176,6 +246,7 @@ namespace ConsoleAppMMM.JULIETClasses
         {
             aValue = false;
             if (string.IsNullOrEmpty(aKey) || (aEntryItems == null)) { return false; }
+           
             if (aEntryItems.Any(i => i.Key == aKey))
             {
                 aValue = Conversions.StringToBool(aEntryItems.Single(i => i.Key == aKey).Value);
@@ -188,6 +259,7 @@ namespace ConsoleAppMMM.JULIETClasses
         {
             aValue = "";
             if (string.IsNullOrEmpty(aKey) || (aEntryItems == null)) { return false; }
+            
             if (aEntryItems.Any(i => i.Key == aKey))
             {
                 aValue = aEntryItems.Single(i => i.Key == aKey).Value;
@@ -200,6 +272,7 @@ namespace ConsoleAppMMM.JULIETClasses
         {
             aValue = DateTime.MinValue;
             if (string.IsNullOrEmpty(aKey) || (aEntryItems == null)) { return false; }
+            
             if (aEntryItems.Any(i => i.Key == aKey))
             {
                 aValue = Conversions.StringToDateTime(aEntryItems.Single(i => i.Key == aKey).Value);
@@ -212,9 +285,23 @@ namespace ConsoleAppMMM.JULIETClasses
         {
             aValue = DateTime.MinValue;
             if (string.IsNullOrEmpty(aKey) || (aEntryItems == null)) { return false; }
+            
             if (aEntryItems.Any(i => i.Key == aKey))
             {
                 aValue = Conversions.StringToDateTime(aEntryItems.Single(i => i.Key == aKey).Value, aDate);
+                return true;
+            }
+            return false;
+        }
+
+        private bool LoadFromEntries(string aKey, List<EntryItem> aEntryItems, out int aValue)
+        {
+            aValue = 0;
+            if (string.IsNullOrEmpty(aKey) || (aEntryItems == null)) { return false; }
+
+            if (aEntryItems.Any(i => i.Key == aKey))
+            {
+                aValue = Conversions.StringToSeconds(aEntryItems.Single(i => i.Key == aKey).Value);
                 return true;
             }
             return false;
@@ -224,11 +311,16 @@ namespace ConsoleAppMMM.JULIETClasses
         {
             aValue = 0;
             if (string.IsNullOrEmpty(aKey) || (aEntryItems == null)) { return false; }
+           
             if (aEntryItems.Any(i => i.Key == aKey))
             {
                 string valueStringComplete = aEntryItems.Single(i => i.Key == aKey).Value;
-                string valueString = valueStringComplete.Substring(0, valueStringComplete.Length - aToRemoveFromEnd);
-                return int.TryParse(valueString, out aValue);
+                if (!string.IsNullOrEmpty(valueStringComplete))
+                {
+                    string valueString = valueStringComplete.Substring(0, valueStringComplete.Length - aToRemoveFromEnd);
+                    return int.TryParse(valueString, out aValue);
+                }
+                return true;
             }
             return false;
         }
@@ -237,11 +329,16 @@ namespace ConsoleAppMMM.JULIETClasses
         {
             aValue = 0.0;
             if (string.IsNullOrEmpty(aKey) || (aEntryItems == null)) { return false; }
+            
             if (aEntryItems.Any(i => i.Key == aKey))
             {
                 string valueStringComplete = aEntryItems.Single(i => i.Key == aKey).Value;
-                string valueString = valueStringComplete.Substring(0, valueStringComplete.Length - aToRemoveFromEnd);
-                return double.TryParse(aEntryItems.Single(i => i.Key == aKey).Value, out aValue);
+                if (!string.IsNullOrEmpty(valueStringComplete))
+                {
+                    string valueString = valueStringComplete.Substring(0, valueStringComplete.Length - aToRemoveFromEnd);
+                    return double.TryParse(aEntryItems.Single(i => i.Key == aKey).Value, out aValue);
+                }
+                return true;
             }
             return false;
         }
@@ -250,6 +347,7 @@ namespace ConsoleAppMMM.JULIETClasses
         {
             if ((aMMMSimSocket == null) || (aEntryItems == null)) { return false; }
             if (SensorCount <= 0) { return false; }
+            
             MachineSensors = new List<JuMachineSensor>();
             XElement sensorsElement = aMMMSimSocket.Element("Sensors");
             if (sensorsElement != null)
@@ -282,6 +380,7 @@ namespace ConsoleAppMMM.JULIETClasses
         {
             if ((aSensorID < 0) || (aSensorID > SensorCount)) { return false; }
             if (aValuesElement == null) { return false; }
+            
             if (aSensorID == 0)
             {
                 MachineSensorValues = new List<JuMachineSensorValue>();

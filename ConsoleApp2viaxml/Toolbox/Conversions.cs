@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Globalization;
+using System.IO;
+using System.Text.RegularExpressions;
 
-namespace ConsoleApp1.Toolbox
+namespace ConsoleAppMMM.Toolbox
 {
     public enum JuMachineInterfaceType
     {
@@ -30,6 +32,31 @@ namespace ConsoleApp1.Toolbox
 
     public static class Conversions
     {
+        private const string RegExBelimed = @"^[CK]_\d+_\d+$";
+        private const string RegExMMM = @"^\d{7}[+-]$";
+
+        public static bool CheckFileName(string aFileFullPath, JuMachineInterfaceType aMachineInterfaceType)
+        {
+            if (string.IsNullOrEmpty(aFileFullPath)) { return false; }
+            string fileName = Path.GetFileNameWithoutExtension(aFileFullPath);
+            if (string.IsNullOrEmpty(fileName)) { return false; }
+            switch (aMachineInterfaceType)
+            {
+                default:
+                case JuMachineInterfaceType.NotDefined:
+                    return false;
+                case JuMachineInterfaceType.Belimed:
+                    return CheckFileNameBelimed(fileName);
+                case JuMachineInterfaceType.MMM:
+                    return CheckFileNameMMM(fileName);
+            }
+        }
+
+        public static string BoolToString(bool aBool)
+        {
+            return aBool ? "T" : "F";
+        }
+
         public static bool StringToBool(string aBoolString)
         {
             if (string.IsNullOrEmpty(aBoolString)) { return false; }
@@ -37,11 +64,9 @@ namespace ConsoleApp1.Toolbox
             return aBoolString.Equals("true");
         }
 
-        // DateTime format YYYY-MM-DDTHH:mm:ssZ
         public static DateTime StringToDateTime(string aDateTimeString)
         {
             if (string.IsNullOrEmpty(aDateTimeString)) { return DateTime.MinValue; }
-            if (aDateTimeString.Length < 24) { return DateTime.MinValue; }
             if (DateTime.TryParse(aDateTimeString, out DateTime result)) { return result; }
             return DateTime.MinValue;
         }
@@ -54,6 +79,17 @@ namespace ConsoleApp1.Toolbox
             if (aDate == DateTime.MinValue || aDate == DateTime.MaxValue) { return DateTime.MinValue; }
             if (!DateTime.TryParseExact(aTimeString, "HH:m:ss", null, DateTimeStyles.None, out DateTime time)) { return DateTime.MinValue; }
             return new DateTime(aDate.Year, aDate.Month, aDate.Day, time.Hour, time.Minute, time.Second);
+        }
+
+        // Time format HH:mm:ss
+        public static int StringToSeconds(string aTimeString)
+        {
+            if (string.IsNullOrEmpty(aTimeString)) { return 0; }
+            if (aTimeString.Length < 8) { return 0; }
+            if (!int.TryParse(aTimeString.Substring(0, 2), out int hours)) { return 0; }
+            if (!int.TryParse(aTimeString.Substring(3, 2), out int minutes)) { return 0; }
+            if (!int.TryParse(aTimeString.Substring(5, 2), out int seconds)) { return 0; }
+            return (hours * 60 * 60) + (minutes * 60) + seconds;
         }
 
         public static JuSensorType StringToSensorType(string aSensorTypeAsString)
@@ -90,6 +126,36 @@ namespace ConsoleApp1.Toolbox
                 case "min":
                     return JuSensorUnit.Min;
             }
+        }
+
+        private static bool CheckFileNameBelimed(string aFileName)
+        {
+            if (aFileName.Length < 5)
+            {
+                Console.WriteLine("CheckFileNameBelimed: " + aFileName + " file name too short");
+                return false;
+            }
+            if (!Regex.IsMatch(aFileName, RegExBelimed))
+            {
+                Console.WriteLine("CheckFileNameBelimed: " + aFileName + " file name not has correct format");
+                return false;
+            }
+            return true;
+        }
+
+        private static bool CheckFileNameMMM(string aFileName)
+        {
+            if (aFileName.Length != 8)
+            {
+                Console.WriteLine("CheckFileNameMMM: " + aFileName + " file name not has correct length");
+                return false;
+            }
+            if (!Regex.IsMatch(aFileName, RegExMMM))
+            {
+                Console.WriteLine("CheckFileNameMMM: " + aFileName + " file name not has correct format");
+                return false;
+            }
+            return true;
         }
     }
 }
