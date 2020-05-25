@@ -1,13 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Configuration;
 using System.Data.SqlClient;
 using System.IO;
-using System.Xml.Linq;
-using System.Linq;
 using ConsoleAppMMM.JULIETClasses;
 using ConsoleAppMMM.Toolbox;
-using System.Globalization;
 
 namespace ConsoleAppMMM
 {
@@ -42,6 +38,7 @@ namespace ConsoleAppMMM
                     // Enable the user to quit the program
                     Console.WriteLine("Monitoring: " + SourceFolder);
                     Console.WriteLine("Press 'q' to quit the application.");
+                    Console.WriteLine();
                     while (Console.Read() != 'q') ;
                 }
             }
@@ -59,11 +56,11 @@ namespace ConsoleAppMMM
             try
             {
                 Console.WriteLine("trying to connect");
-                //connection = DBMsSql.GetConnection(Database, Server, UserID, Password);
-                string connectionString = "Data Source=DESKTOP-81I8VH5\\SQLEXPRESS07; Initial Catalog = Galenus; Integrated Security = True";
-                string sql = "";
-                connection = new SqlConnection(connectionString);
-                connection.Open();
+                connection = DBMsSql.GetConnection(Database, Server, UserID, Password);
+                //string connectionString = "Data Source=DESKTOP-81I8VH5\\SQLEXPRESS07; Initial Catalog = Galenus; Integrated Security = True"; // Deze gegevens moeten instelbaar zijn, dus staan in App.config. Zo'n gegevens mag je nooit hardcoded in een applicatie zetten.
+                //string sql = ""; // VW 25/05/2020: wordt niet gebruikt en heb je niet nodig hier. Alle SQL code staat in DBMsSql.
+                //connection = new SqlConnection(connectionString); // VW 25/05/2020: Je connection vraag je op via methode DBMsSql.GetConnection(...)
+                //connection.Open(); // VW 25/05/2020: wordt al gedaan in methode DBMsSql.GetConnection(...)
                 if (connection != null)
                 {
                     if (!DBMsSql.GetMDNDX(connection, Schema, out long mdNDX))
@@ -94,13 +91,20 @@ namespace ConsoleAppMMM
                             return;
                         }
                     }
-                    // TODO: save the lists MachineSensors and MachineSensorValues to the database
+                    foreach (JuMachineSensorValue machineSensorValue in machineDataMMM.MachineSensorValues)
+                    {
+                        if (!DBMsSql.Insert(machineSensorValue, connection, Schema))
+                        {
+                            Console.WriteLine(e.Name + ": MachineSensorValue " + machineSensorValue.DTArgument.ToString() + " could not be written to database");
+                            return;
+                        }
+                    }
                 }
                 else
                 {
                     Console.WriteLine("Connection to database failed");
                 }
-                connection.Close();
+                //connection.Close(); // VW 25/05/2020: staat reeds in het Finally block
             }
             catch (Exception exc)
             {
@@ -113,7 +117,7 @@ namespace ConsoleAppMMM
 
             if (ArchiveFile)
             {
-                if (!MoveFileToArchive(e.FullPath))
+                if (MoveFileToArchive(e.FullPath))
                 {
                     Console.WriteLine(e.Name + " was archived.");
                 }
@@ -122,15 +126,24 @@ namespace ConsoleAppMMM
                     Console.WriteLine(e.Name + " could not be archived.");
                 }
             }
+            Console.WriteLine();
         }
 
         private static bool MoveFileToArchive(string aFileFullPath)
         {
             if (!File.Exists(aFileFullPath)) { return false; }
-            
-            // TODO: write function
-            if (!MoveFile(aFileFullPath)) { return false; }
-            return true;
+            string destFile = aFileFullPath.Replace(SourceFolder, ArchiveFolder);
+            try
+            {
+                File.Copy(aFileFullPath, destFile, false);
+                File.Delete(aFileFullPath);
+                return true;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+            return false;
         }
 
         private static bool ConfigureApplication()
@@ -165,40 +178,40 @@ namespace ConsoleAppMMM
 
 
         }
-        static private bool MoveFile(string aFileFullPath)
-        {
+        //static private bool MoveFile(string aFileFullPath)
+        //{
             
-            string FilePath    = aFileFullPath;
-            int    Length      = SourceFolder.Length;
-            string Ksubstring  = FilePath.Substring(Length + 1);
-            string destFile    = System.IO.Path.Combine(ArchiveFolder, Ksubstring);
-            //coppy the map structure
-            string stringCutted = destFile.Split('\\').Last();
-            int LengthFile = stringCutted.Length;
-            string destfile2 = destFile.Remove(destFile.Length - LengthFile);
-            System.IO.Directory.CreateDirectory(destfile2);
-            //stop coppy the map sturcture
-            if (System.IO.Directory.Exists(SourceFolder)) 
-            {
-                System.IO.File.Copy(FilePath, destFile, true);
-            }
-            else
-            {
-                Console.WriteLine("Source path does not exist!");
-                return false;
-            }
-            try
-            {
-                System.IO.File.Delete(@FilePath);
-            }
-            catch (System.IO.IOException e)
-            {
-                Console.WriteLine(e.Message);
-                return false;
-            }
-            return true;
+            //string FilePath = aFileFullPath;
+            //int Length = SourceFolder.Length;
+            //string Ksubstring = FilePath.Substring(Length + 1);
+            //string destFile = System.IO.Path.Combine(ArchiveFolder, Ksubstring);
+            ////coppy the map structure
+            //string stringCutted = destFile.Split('\\').Last();
+            //int LengthFile = stringCutted.Length;
+            //string destfile2 = destFile.Remove(destFile.Length - LengthFile);
+            //System.IO.Directory.CreateDirectory(destfile2);
+            ////stop coppy the map sturcture
+            //if (System.IO.Directory.Exists(SourceFolder)) 
+            //{
+            //    System.IO.File.Copy(FilePath, destFile, true);
+            //}
+            //else
+            //{
+            //    Console.WriteLine("Source path does not exist!");
+            //    return false;
+            //}
+            //try
+            //{
+            //    System.IO.File.Delete(@FilePath);
+            //}
+            //catch (System.IO.IOException e)
+            //{
+            //    Console.WriteLine(e.Message);
+            //    return false;
+            //}
+            //return true;
 
-         }
+         //}
     }
 
 
