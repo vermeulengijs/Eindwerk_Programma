@@ -168,10 +168,10 @@ namespace ConsoleAppMMM
         static private bool MoveFile(string aFileFullPath)
         {
             
-            string FilePath = aFileFullPath;
-            int Length = SourceFolder.Length;
-            string Ksubstring = FilePath.Substring(Length + 1);
-            string destFile = System.IO.Path.Combine(ArchiveFolder, Ksubstring);
+            string FilePath    = aFileFullPath;
+            int    Length      = SourceFolder.Length;
+            string Ksubstring  = FilePath.Substring(Length + 1);
+            string destFile    = System.IO.Path.Combine(ArchiveFolder, Ksubstring);
             //coppy the map structure
             string stringCutted = destFile.Split('\\').Last();
             int LengthFile = stringCutted.Length;

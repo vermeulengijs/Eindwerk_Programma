@@ -2,7 +2,14 @@
   "ExpandedNodes": [
     "",
     "\\ConsoleApp2viaxml",
-    "\\directory"
+    "\\ConsoleApp2viaxml\\bin",
+    "\\ConsoleApp2viaxml\\bin\\Release",
+    "\\ConsoleApp2viaxml\\JULIETClasses",
+    "\\ConsoleApp2viaxml\\obj",
+    "\\ConsoleApp2viaxml\\Properties",
+    "\\ConsoleApp2viaxml\\Toolbox",
+    "\\directory",
+    "\\directory\\Gelezen"
   ],
   "SelectedNode": "\\ConsoleApp2viaxml\\Program.cs",
   "PreviewInSolutionExplorer": false
