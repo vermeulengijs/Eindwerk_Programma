@@ -12,9 +12,16 @@ namespace ConsoleAppMMM.Toolbox
             {
                 InitialCatalog = aDatabase,
                 DataSource = aServer,
-                UserID = aUserID,
-                Password = aPassword
             };
+            if (string.IsNullOrEmpty(aUserID) || string.IsNullOrEmpty(aPassword))
+            {
+                connectionStringBuilder.IntegratedSecurity = true;
+            }
+            else
+            {
+                connectionStringBuilder.UserID = aUserID;
+                connectionStringBuilder.Password = aPassword;
+            }
             SqlConnection connection = new SqlConnection(connectionStringBuilder.ConnectionString);
             if (connection != null) { connection.Open(); }
             return connection;

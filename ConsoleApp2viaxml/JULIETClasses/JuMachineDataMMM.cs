@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using ConsoleAppMMM.Toolbox;
 
@@ -9,6 +10,7 @@ namespace ConsoleAppMMM.JULIETClasses
 {
     public class JuMachineDataMMM : JuMachineData
     {
+        private const string RegExWhiteSpace = @"\s+";
         public string SerialNumber { get; private set; } = "";
         public string Company2 { get; private set; } = "";
         public string StoppedBy { get; private set; } = "";
@@ -318,6 +320,7 @@ namespace ConsoleAppMMM.JULIETClasses
                 if (!string.IsNullOrEmpty(valueStringComplete))
                 {
                     string valueString = valueStringComplete.Substring(0, valueStringComplete.Length - aToRemoveFromEnd);
+                    valueString = Regex.Replace(valueString, RegExWhiteSpace, "");
                     return int.TryParse(valueString, out aValue);
                 }
                 return true;
@@ -336,7 +339,9 @@ namespace ConsoleAppMMM.JULIETClasses
                 if (!string.IsNullOrEmpty(valueStringComplete))
                 {
                     string valueString = valueStringComplete.Substring(0, valueStringComplete.Length - aToRemoveFromEnd);
-                    return double.TryParse(aEntryItems.Single(i => i.Key == aKey).Value, out aValue);
+                    valueString = Regex.Replace(valueString, RegExWhiteSpace, "");
+                    valueString = valueString.Replace(',', '.');
+                    return double.TryParse(valueString, out aValue);
                 }
                 return true;
             }
@@ -365,8 +370,14 @@ namespace ConsoleAppMMM.JULIETClasses
                         if (i > 0)
                         {
                             sensorUnit = Conversions.StringToSensorUnit(valuesElement.ElementAt(i).Attribute("Unit").Value);
-                            if (!double.TryParse(valuesElement.ElementAt(i).Attribute("MIN_VALUE").Value, out minValue)) { return false; }
-                            if (!double.TryParse(valuesElement.ElementAt(i).Attribute("MAX_VALUE").Value, out maxValue)) { return false; }
+                            string minValueString = valuesElement.ElementAt(i).Attribute("MIN_VALUE").Value;
+                            string maxValueString = valuesElement.ElementAt(i).Attribute("MAX_VALUE").Value;
+                            minValueString = Regex.Replace(minValueString, RegExWhiteSpace, "");
+                            minValueString = minValueString.Replace(',', '.');
+                            maxValueString = Regex.Replace(maxValueString, RegExWhiteSpace, "");
+                            maxValueString = maxValueString.Replace(',', '.');
+                            if (!double.TryParse(minValueString, out minValue)) { return false; }
+                            if (!double.TryParse(maxValueString, out maxValue)) { return false; }
                         }
                         MachineSensors.Add(new JuMachineSensor(MDNDX, i, caption, sensorType, sensorUnit, minValue, maxValue));
                         if(!LoadMachineSensorValues(i, valuesElement.ElementAt(i))) { return false; }
@@ -400,7 +411,10 @@ namespace ConsoleAppMMM.JULIETClasses
                     }
                     else
                     {
-                        if (!double.TryParse(valueElements.ElementAt(i).Value, out double value)) { return false; }
+                        string valueString = valueElements.ElementAt(i).Value;
+                        valueString = Regex.Replace(valueString, RegExWhiteSpace, "");
+                        valueString = valueString.Replace(',', '.');
+                        if (!double.TryParse(valueString, out double value)) { return false; }
                         MachineSensorValues[i][aSensorID] = value;
                     }
                 }
