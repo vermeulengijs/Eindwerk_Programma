@@ -1,0 +1,7 @@
+C:\Users\Gijs\Documents\GitHub\Eindwerk_Programma\ConsoleApp2viaxml\obj\Debug\ConsoleAppMMM.csprojAssemblyReference.cache
+C:\Users\Gijs\Documents\GitHub\Eindwerk_Programma\ConsoleApp2viaxml\obj\Debug\ConsoleAppMMM.csproj.CoreCompileInputs.cache
+C:\Users\Gijs\Documents\GitHub\Eindwerk_Programma\ConsoleApp2viaxml\obj\Debug\ConsoleApp1.exe
+C:\Users\Gijs\Documents\GitHub\Eindwerk_Programma\ConsoleApp2viaxml\obj\Debug\ConsoleApp1.pdb
+C:\Users\Gijs\Documents\GitHub\Eindwerk_Programma\ConsoleApp2viaxml\bin\Debug\ConsoleApp1.exe.config
+C:\Users\Gijs\Documents\GitHub\Eindwerk_Programma\ConsoleApp2viaxml\bin\Debug\ConsoleApp1.exe
+C:\Users\Gijs\Documents\GitHub\Eindwerk_Programma\ConsoleApp2viaxml\bin\Debug\ConsoleApp1.pdb

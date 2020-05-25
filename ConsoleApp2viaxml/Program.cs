@@ -58,7 +58,12 @@ namespace ConsoleAppMMM
             SqlConnection connection = null;
             try
             {
-                connection = DBMsSql.GetConnection(Database, Server, UserID, Password);
+                Console.WriteLine("trying to connect");
+                //connection = DBMsSql.GetConnection(Database, Server, UserID, Password);
+                string connectionString = "Data Source=DESKTOP-81I8VH5\\SQLEXPRESS07; Initial Catalog = Galenus; Integrated Security = True";
+                string sql = "";
+                connection = new SqlConnection(connectionString);
+                connection.Open();
                 if (connection != null)
                 {
                     if (!DBMsSql.GetMDNDX(connection, Schema, out long mdNDX))
@@ -95,6 +100,7 @@ namespace ConsoleAppMMM
                 {
                     Console.WriteLine("Connection to database failed");
                 }
+                connection.Close();
             }
             catch (Exception exc)
             {
@@ -123,6 +129,7 @@ namespace ConsoleAppMMM
             if (!File.Exists(aFileFullPath)) { return false; }
             
             // TODO: write function
+            if (!MoveFile(aFileFullPath)) { return false; }
             return true;
         }
 
@@ -155,37 +162,50 @@ namespace ConsoleAppMMM
                 Console.WriteLine("ConfigureApplication: " + e.Message);
             }
             return false;
+
+
         }
+        static private bool MoveFile(string aFileFullPath)
+        {
+            
+            string FilePath = aFileFullPath;
+            int Length = SourceFolder.Length;
+            string Ksubstring = FilePath.Substring(Length + 1);
+            string destFile = System.IO.Path.Combine(ArchiveFolder, Ksubstring);
+            //coppy the map structure
+            string stringCutted = destFile.Split('\\').Last();
+            int LengthFile = stringCutted.Length;
+            string destfile2 = destFile.Remove(destFile.Length - LengthFile);
+            System.IO.Directory.CreateDirectory(destfile2);
+            //stop coppy the map sturcture
+            if (System.IO.Directory.Exists(SourceFolder)) 
+            {
+                System.IO.File.Copy(FilePath, destFile, true);
+            }
+            else
+            {
+                Console.WriteLine("Source path does not exist!");
+                return false;
+            }
+            try
+            {
+                System.IO.File.Delete(@FilePath);
+            }
+            catch (System.IO.IOException e)
+            {
+                Console.WriteLine(e.Message);
+                return false;
+            }
+            return true;
+
+         }
     }
 
-    public class FileInputMonitor
-    {
 
-        public FileSystemWatcher fileSystemWatcher;
-        //private string folderToWatchFor = AppDomain.CurrentDomain.SetupInformation.ApplicationBase + "toTechcoil";
-
-        // een specifieke path naar de directory waar het bestand in komt.
-        //string SourceFolder = @"C:\Users\gijsimus\Desktop\directory\testfile";
-        //string DestinationFolder = @"C:\Users\gijsimus\Desktop\directory\Gelezen\GELEZEN.txt";
-
-        string SourceFolder = @"C:\Users\Gijs\Desktop\directory\testfile";
-        //string DestinationFolder = @"C:\Users\Gijs\Desktop\directory\Gelezen\GELEZEN.txt";
-
-        int a = 0;  // # files dat er gebeurd zijn
+       //  string SourceFolder = @"C:\Users\Gijs\Desktop\directory\testfile";
 
 
-        public FileInputMonitor()
-        {
-
-            fileSystemWatcher = new FileSystemWatcher(SourceFolder)
-            {
-                Filter = "*.XML",            // Filteren op bestanden van het type .xml
-                EnableRaisingEvents = true   // events enabelenn 
-            };  
-            fileSystemWatcher.Created += new FileSystemEventHandler(FileCreated);
-           
-        }
-
+        /*
         private void FileCreated(Object sender, FileSystemEventArgs e)
         {
             // er is een nieuw bestand in de map geplaatst
@@ -294,6 +314,8 @@ namespace ConsoleAppMMM
         /* MoveFile Function
          *  Een functie dat dient om het bestand te verplaatsen en te hernoemen als alle data verwerkt is.
          */
+         
+        /*
         private void MoveFile(string fileName)
         {
             a++;
@@ -302,8 +324,9 @@ namespace ConsoleAppMMM
             File.Move(fileName, Destination);
             return;
         }
+        */
+    
 
     }
 
-}
 
