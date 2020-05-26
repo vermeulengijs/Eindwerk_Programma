@@ -317,7 +317,7 @@ namespace ConsoleAppMMM.JULIETClasses
             if (aEntryItems.Any(i => i.Key == aKey))
             {
                 string valueStringComplete = aEntryItems.Single(i => i.Key == aKey).Value;
-                if (!string.IsNullOrEmpty(valueStringComplete))
+                if (!string.IsNullOrEmpty(valueStringComplete) && (valueStringComplete.Length > aToRemoveFromEnd))
                 {
                     string valueString = valueStringComplete.Substring(0, valueStringComplete.Length - aToRemoveFromEnd);
                     valueString = Regex.Replace(valueString, RegExWhiteSpace, "");
@@ -336,7 +336,7 @@ namespace ConsoleAppMMM.JULIETClasses
             if (aEntryItems.Any(i => i.Key == aKey))
             {
                 string valueStringComplete = aEntryItems.Single(i => i.Key == aKey).Value;
-                if (!string.IsNullOrEmpty(valueStringComplete))
+                if (!string.IsNullOrEmpty(valueStringComplete) && (valueStringComplete.Length > aToRemoveFromEnd))
                 {
                     string valueString = valueStringComplete.Substring(0, valueStringComplete.Length - aToRemoveFromEnd);
                     valueString = Regex.Replace(valueString, RegExWhiteSpace, "");

@@ -99,6 +99,17 @@ namespace ConsoleAppMMM
                             return;
                         }
                     }
+                    if (ArchiveFile)
+                    {
+                        if (MoveFileToArchive(e.FullPath))
+                        {
+                            Console.WriteLine(e.Name + " was archived.");
+                        }
+                        else
+                        {
+                            Console.WriteLine(e.Name + " could not be archived.");
+                        }
+                    }
                 }
                 else
                 {
@@ -109,24 +120,13 @@ namespace ConsoleAppMMM
             catch (Exception exc)
             {
                 Console.WriteLine(e.Name + " database handling error: " + exc.Message);
+                return;
             }
             finally
             {
                 if (connection != null) { connection.Close(); }
+                Console.WriteLine();
             }
-
-            if (ArchiveFile)
-            {
-                if (MoveFileToArchive(e.FullPath))
-                {
-                    Console.WriteLine(e.Name + " was archived.");
-                }
-                else
-                {
-                    Console.WriteLine(e.Name + " could not be archived.");
-                }
-            }
-            Console.WriteLine();
         }
 
         private static bool MoveFileToArchive(string aFileFullPath)

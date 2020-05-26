@@ -68,12 +68,34 @@ namespace ConsoleAppMMM.Toolbox
                 cmd.Parameters.AddWithValue("@PROGRAMNAME", aMachineDataMMM.ProgramName);
                 cmd.Parameters.AddWithValue("@STARTEDBY", aMachineDataMMM.StartedBy);
                 cmd.Parameters.AddWithValue("@SOFTWAREVERSION", aMachineDataMMM.SoftwareVersion);
-                cmd.Parameters.AddWithValue("@LASTBDTEST", aMachineDataMMM.LastBDTest);
+                if (aMachineDataMMM.LastBDTest > DateTime.MinValue)
+                {
+                    cmd.Parameters.AddWithValue("@LASTBDTEST", aMachineDataMMM.LastBDTest);
+                }
+                else
+                {
+                    cmd.Parameters.AddWithValue("@LASTBDTEST", null);
+                }
                 cmd.Parameters.AddWithValue("@LASTBDTESTREFERENCE", aMachineDataMMM.LastBDTestReference);
-                cmd.Parameters.AddWithValue("@LASTVACUUMTEST", aMachineDataMMM.LastVacuumTest);
+                if (aMachineDataMMM.LastVacuumTest > DateTime.MinValue)
+                {
+                    cmd.Parameters.AddWithValue("@LASTVACUUMTEST", aMachineDataMMM.LastVacuumTest);
+                }
+                else
+                {
+                    cmd.Parameters.AddWithValue("@LASTVACUUMTEST", null);
+                }
                 cmd.Parameters.AddWithValue("@LASTVACUUMTESTREFERENCE", aMachineDataMMM.LastVacuumTestReference);
                 cmd.Parameters.AddWithValue("@CYCLEREFERENCE", aMachineDataMMM.CycleReference);
+                if (aMachineDataMMM.CycleStarted == DateTime.MinValue)
+                {
+                    return false; // Not null constraint in database
+                }
                 cmd.Parameters.AddWithValue("@CYCLESTARTED", aMachineDataMMM.CycleStarted);
+                if (aMachineDataMMM.CycleEnded == DateTime.MinValue)
+                {
+                    return false; // Not null constraint in database
+                }
                 cmd.Parameters.AddWithValue("@CYCLEENDED", aMachineDataMMM.CycleEnded);
                 cmd.Parameters.AddWithValue("@ISCYCLEOK", Conversions.BoolToString(aMachineDataMMM.IsCycleOk));
                 cmd.Parameters.AddWithValue("@CYCLERESULT", aMachineDataMMM.CycleResult);
@@ -92,19 +114,47 @@ namespace ConsoleAppMMM.Toolbox
                 cmd.Parameters.AddWithValue("@PRESSUREDIFFERENCE2", aMachineDataMMM.PressureDifference2);
                 cmd.Parameters.AddWithValue("@PRESSUREDIFFERENCEALLOWED", aMachineDataMMM.PressureDifferenceAllowed);
                 cmd.Parameters.AddWithValue("@AIRREMOVALCOUNT", aMachineDataMMM.AirRemovalCount);
-                cmd.Parameters.AddWithValue("@AIRREMOVALSTART", aMachineDataMMM.AirRemovalStart);
+                if (aMachineDataMMM.AirRemovalStart > DateTime.MinValue)
+                {
+                    cmd.Parameters.AddWithValue("@AIRREMOVALSTART", aMachineDataMMM.AirRemovalStart);
+                }
+                else
+                {
+                    cmd.Parameters.AddWithValue("@AIRREMOVALSTART", null);
+                }
                 cmd.Parameters.AddWithValue("@PREPHASEPRESSUREMIN", aMachineDataMMM.PrephasePressureMin);
                 cmd.Parameters.AddWithValue("@PREPHASEPRESSUREMAX", aMachineDataMMM.PrephasePressureMax);
                 cmd.Parameters.AddWithValue("@WAITINGTIME", aMachineDataMMM.WaitingTime);
-                cmd.Parameters.AddWithValue("@HOLDTIMESTART", aMachineDataMMM.HoldTimeStart);
+                if (aMachineDataMMM.HoldTimeStart > DateTime.MinValue)
+                {
+                    cmd.Parameters.AddWithValue("@HOLDTIMESTART", aMachineDataMMM.HoldTimeStart);
+                }
+                else
+                {
+                    cmd.Parameters.AddWithValue("@HOLDTIMESTART", null);
+                }
                 cmd.Parameters.AddWithValue("@HOLDTIMESTARTPRESSURE", aMachineDataMMM.HoldTimeStartPressure);
                 cmd.Parameters.AddWithValue("@HOLDTIMESTARTTEMP", aMachineDataMMM.HoldTimeStartTemp);
                 cmd.Parameters.AddWithValue("@HOLDTIMESTARTAIRDETECTOR", aMachineDataMMM.HoldTimeStartAirDetector);
-                cmd.Parameters.AddWithValue("@HOLDTIMEEND", aMachineDataMMM.HoldTimeEnd);
+                if (aMachineDataMMM.HoldTimeEnd > DateTime.MinValue)
+                {
+                    cmd.Parameters.AddWithValue("@HOLDTIMEEND", aMachineDataMMM.HoldTimeEnd);
+                }
+                else
+                {
+                    cmd.Parameters.AddWithValue("@HOLDTIMEEND", null);
+                }
                 cmd.Parameters.AddWithValue("@HOLDTIMEENDPRESSURE", aMachineDataMMM.HoldTimeEndPressure);
                 cmd.Parameters.AddWithValue("@HOLDTIMEENDTEMP", aMachineDataMMM.HoldTimeEndTemp);
                 cmd.Parameters.AddWithValue("@HOLDTIMEENDAIRDETECTOR", aMachineDataMMM.HoldTimeEndAirDetector);
-                cmd.Parameters.AddWithValue("@DRYINGEND", aMachineDataMMM.DryingEnd);
+                if (aMachineDataMMM.DryingEnd > DateTime.MinValue)
+                {
+                    cmd.Parameters.AddWithValue("@DRYINGEND", aMachineDataMMM.DryingEnd);
+                }
+                else
+                {
+                    cmd.Parameters.AddWithValue("@DRYINGEND", null);
+                }
                 cmd.Parameters.AddWithValue("@DRYINGENDPRESSURE", aMachineDataMMM.DryingEndPressure);
                 cmd.Parameters.AddWithValue("@STEAMSPYPRESENT", Conversions.BoolToString(aMachineDataMMM.SteamSpyPresent));
                 cmd.Parameters.AddWithValue("@STEAMSPYRESULT", Conversions.BoolToString(aMachineDataMMM.SteamSpyResult));
@@ -146,7 +196,14 @@ namespace ConsoleAppMMM.Toolbox
             using (SqlCommand cmd = new SqlCommand(sql, aConnection))
             {
                 cmd.Parameters.AddWithValue("@MDNDX", aMachineSensorValue.MDNDX);
-                cmd.Parameters.AddWithValue("@DTARGUMENT", aMachineSensorValue.DTArgument);
+                if (aMachineSensorValue.DTArgument > DateTime.MinValue)
+                {
+                    cmd.Parameters.AddWithValue("@DTARGUMENT", aMachineSensorValue.DTArgument);
+                }
+                else
+                {
+                    cmd.Parameters.AddWithValue("@DTARGUMENT", null);
+                }
                 cmd.Parameters.AddWithValue("@SENSOR1", aMachineSensorValue.Sensor1);
                 cmd.Parameters.AddWithValue("@SENSOR2", aMachineSensorValue.Sensor2);
                 cmd.Parameters.AddWithValue("@SENSOR3", aMachineSensorValue.Sensor3);
