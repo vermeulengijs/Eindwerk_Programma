@@ -18,7 +18,7 @@ Dit wordt gedaan door tekst te zoeken in een bepaalde volgorde. Deze tekst ligt 
 Het aantal waardes van de sensoren ligt nooit vast, deze gaan we ook bepalen via een functie.
 De lengte van de waardes van de sensoren ligt ook nooit vast, deze wordt dus ook per waarde bepaald.
 
-Alles in het bestand is dus variabel ! ( ik hou ni echt van hard coding, plus dat is niet efficient ) 
+Alles in het bestand is dus variabel ! ( ik hou nietecht van hard coding, plus dat is niet efficient ) 
 De enige hard coding zijn de tekst strings dat we zoeken in het bestand maar, we zijn zeker dat deze er altijd in deze volgorde instaan.
 Tenzij MMM hun files oppeens aanpast.
 
